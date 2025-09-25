@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: web_php
+    container_name: php_app
     ports:
       - "8082:80"
     volumes:
