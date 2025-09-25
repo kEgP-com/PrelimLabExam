@@ -12,6 +12,7 @@ if (!$conn->query($sql)) {
 
 $conn->select_db("library_db");
 
+// default login table the credentials such as the user and the librarian
 $sql = "CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE,
