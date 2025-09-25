@@ -4,9 +4,9 @@ if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);
 }
 
+
 $conn->query("CREATE DATABASE IF NOT EXISTS library_db");
 $conn->select_db("library_db");
-
 // default login table the credentials such as the user and the librarian
 $conn->query("CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -22,7 +22,10 @@ $conn->query("INSERT IGNORE INTO users (username, password, role) VALUES
 ");
 
 
-$conn->query("CREATE TABLE IF NOT EXISTS books (
+$conn->query("DROP TABLE IF EXISTS books");
+
+
+$conn->query("CREATE TABLE books (
     isbn_num VARCHAR(20) PRIMARY KEY,
     title_book VARCHAR(100) NOT NULL,
     author_book VARCHAR(100) NOT NULL,
@@ -30,7 +33,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS books (
     avail_book INT DEFAULT 1,
     date_added DATE
 )");
-
 
 $conn->query("INSERT IGNORE INTO books (isbn_num, title_book, author_book, book_copy, avail_book, date_added) VALUES
     ('B001', 'The Great Gatsby', 'F. Scott Fitzgerald', 3, 3, '2025-01-10'),
