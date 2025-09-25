@@ -37,7 +37,7 @@ $conn->query("INSERT IGNORE INTO books (isbn_num, title_book, author_book, book_
     ('B003', 'To Kill a Mockingbird', 'Harper Lee', 4, 4, '2025-03-20'),
     ('B004', 'Pride and Prejudice', 'Jane Austen', 13, 2, '2025-04-25'),
     ('B005', 'Salimsim', 'Binibining Mia', 3, 3, '2025-05-30')
-)");
+");
 
 echo "Setup done. Users and books added.";
 ?>
