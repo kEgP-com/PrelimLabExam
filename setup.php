@@ -7,7 +7,8 @@ if ($conn->connect_error) {
 $conn->query("CREATE DATABASE IF NOT EXISTS library_db");
 $conn->select_db("library_db");
 
-// Users table
+
+// default login table the credentials such as the user and the librarian
 $conn->query("CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE,
@@ -20,7 +21,6 @@ $conn->query("INSERT IGNORE INTO users (username, password, role) VALUES
     ('user1', MD5('1234'), 'user')
 )");
 
-// Books table with ISBN instead of auto-increment ID
 $conn->query("CREATE TABLE IF NOT EXISTS books (
     isbn VARCHAR(20) PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
