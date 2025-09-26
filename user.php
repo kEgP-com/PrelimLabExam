@@ -8,55 +8,62 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initialscale=1.0">
-        <title>ONLINE LIBRARY</title>
-    </head>
-    <body>
-        <h2>Hello Student! Search for a Book</h2>
-        <form method="GET" action="user.php">
-        <input type="text" name="query" placeholder="Enter title" required>
-        <input type="text" name="query" placeholder="Enter Author" required>
-        <input type="text" name="query" placeholder="Enter Publication Year" required>
-        <input type="text" name="query" placeholder="Enter ISBN" required>
-        <input type="submit" value="Search">
-        </form>
-    <br>
+<html>
+<head>
+    <title>Books List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
 
+<h2>List of Books</h2>
 <?php
-    if (isset($_GET['query'])) {
-        $search = $_GET['query'];
-        $searchQuery = "
-            SELECT * FROM books
-            WHERE Title LIKE '%$search%'
-            OR Author LIKE '%$search%'
-            OR Pub_Year LIKE '%$search%'
-            OR ISBN LIKE '%$search%'";
+    $sql = "SELECT id, title, author, year FROM books"; // change to match your table columns
+$result = $conn->query($sql);
 
-    $data = $mysql->query($searchQuery);
-    if ($data->num_rows > 0) {
-        echo "<table border='1' cellpadding='10' cellspacing='8'>";
+// Display in HTML table
+if ($result->num_rows > 0) {
+    echo "<table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Year</th>
+            </tr>";
+    while ($row = $result->fetch_assoc()) {
         echo "<tr>
-                <th> TITLE </th>
-                <th> AUTHOR </th>
-                <th> YEAR </th>
-                <th> ISBN </th>
-                </tr>";
-    while ($row = $data->fetch_assoc()) {
-        echo "<tr>";
-        echo "<td>" . $row['Title'] . "</td>";
-        echo "<td>" . $row['Author'] . "</td>";
-        echo "<td>" . $row['Pub_Year'] . "</td>";
-        echo "<td>" . $row['ISBN'] . "</td>";
-        echo "</tr>";
-        }
-        echo "</table>";
-    } else {
-        echo "<h3>No books found.</h3>";
-        }
+                <td>" . $row["id"] . "</td>
+                <td>" . $row["title"] . "</td>
+                <td>" . $row["author"] . "</td>
+                <td>" . $row["year"] . "</td>
+              </tr>";
     }
+    echo "</table>";
+} else {
+    echo "<p style='text-align:center;'>No books found.</p>";
+}
+
+$conn->close();
+
 
     echo "<a href='login.php'>BACK TO LOGIN</a>";
 ?>
