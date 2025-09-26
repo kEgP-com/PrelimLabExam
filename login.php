@@ -47,7 +47,7 @@ if (isset($_POST['login'])) {
     <title>Login</title>
 </head>
 <body>
-    <h2>Logisn</h2>
+    <h2>Login</h2>
 
     <?php
     if (isset($error)) {
