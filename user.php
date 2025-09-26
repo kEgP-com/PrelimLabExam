@@ -82,7 +82,7 @@ if ($result->num_rows > 0) {
         $image = "default.jpg";
 
         if ($row["title_book"]== "The Great Gatsby") {
-            $image = "images/thegreatgatsby.jpg";
+            $image = "images/thegreategatsby.jpg";
         } elseif ($row["title_book"]== "1984") {
             $image = "images/1984.jpg";
         }elseif ($row["title_book"]== "To Kill a Mockingbird") {
