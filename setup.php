@@ -17,10 +17,9 @@ $conn->query("CREATE TABLE IF NOT EXISTS users (
 
 
 $conn->query("INSERT IGNORE INTO users (username, password, role) VALUES
-    ('admin', MD5('1234'), 'librarian'),
-    ('user1', MD5('1234'), 'user')
+    ('admin', '1234', 'librarian'),
+    ('user1', '1234', 'user')
 ");
-
 
 $conn->query("DROP TABLE IF EXISTS books");
 
