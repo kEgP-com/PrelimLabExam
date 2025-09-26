@@ -37,7 +37,7 @@
 
 <h2>List of Books</h2>
 <?php
-    $sql = "SELECT id, title, author, year FROM books"; // change to match your table columns
+    $sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added FROM books"; // change to match your table columns
 $result = $conn->query($sql);
 
 // Display in HTML table
