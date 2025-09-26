@@ -1,10 +1,16 @@
 <?php
+// Database connection
+$conn = new mysqli("db", "root", "rootpassword", "library_db");
 
-    $mysql = new mysqli("db", "root", "rootpassword", "library_db");
-        if ($mysql->connect_error) {
-        echo "<h2> Connection Failed </h2>";
-        exit;
-        }
+// Check connection
+if ($conn->connect_error) {
+    die("<h2>Connection Failed</h2>");
+}
+
+// Query all books
+$sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added 
+        FROM books";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -14,58 +20,84 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-        }
-        table {
-            border-collapse: collapse;
-            width: 70%;
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid #999;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
+            background: #f8f9fa;
         }
         h2 {
             text-align: center;
+            margin-top: 20px;
+        }
+        .book-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+            gap: 20px;
+        }
+        .book-card {
+            background: #fff;
+            width: 200px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .book-card:hover {
+            transform: scale(1.05);
+        }
+        .book-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .book-title {
+            font-weight: bold;
+            margin: 10px 0 5px;
+        }
+        .book-author {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .book-info {
+            font-size: 13px;
+            color: #666;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin: 20px;
         }
     </style>
 </head>
 <body>
 
-<h2>List of Books</h2>
-<?php
-    $mysql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added FROM books"; // change to match your table columns
-$result = $conn->query($mysql);
+<h2>Our Book Collection</h2>
 
-// Display in HTML table
+<div class="book-container">
+<?php
 if ($result->num_rows > 0) {
-    echo "<table>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Year</th>
-            </tr>";
     while ($row = $result->fetch_assoc()) {
-        echo "<tr>
-                <td>" . $row["id"] . "</td>
-                <td>" . $row["title"] . "</td>
-                <td>" . $row["author"] . "</td>
-                <td>" . $row["year"] . "</td>
-              </tr>";
+        echo "<div class='book-card'>
+                <img src='thegreategatsby.jpg' alt='Book Cover'>
+                <div class='book-title'>" . $row["title_book"] . "</div>
+                <div class='book-author'>by " . $row["author_book"] . "</div>
+                <div class='book-info'>Copies: " . $row["book_copy"] . "</div>
+                <div class='book-info'>Available: " . $row["avail_book"] . "</div>
+                <div class='book-info'>Added: " . $row["date_added"] . "</div>
+              </div>";
     }
-    echo "</table>";
 } else {
     echo "<p style='text-align:center;'>No books found.</p>";
 }
-
 $conn->close();
-
-
-    echo "<a href='login.php'>BACK TO LOGIN</a>";
 ?>
-    </body>
+</div>
+
+<div class="back-link">
+    <a href="login.php">BACK TO LOGIN</a>
+</div>
+
+</body>
 </html>
