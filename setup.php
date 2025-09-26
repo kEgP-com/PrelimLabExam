@@ -6,7 +6,6 @@ if ($conn->connect_error) {
 
 $conn->query("CREATE DATABASE IF NOT EXISTS library_db");
 $conn->select_db("library_db");
-
 // default login table the credentials such as the user and the librarian
 $conn->query("CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
