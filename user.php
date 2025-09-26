@@ -79,8 +79,21 @@ $result = $conn->query($sql);
 <?php
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
+        $image = "default.jpg";
+
+        if ($row["title_book"]== "The Great Gatsby") {
+            $image = "images/thegreatgatsby.jpg";
+        } elseif ($row["title_book"]== "1984") {
+            $image = "images/1984.jpg";
+        }elseif ($row["title_book"]== "To Kill a Mockingbird") {
+            $image = "images/tokillamockingbird.jpg";
+        }elseif ($row["title_book"]== "Pride and Prejudice") {
+            $image = "images/prideandprejudice.jpg";
+        }elseif ($row["title_book"]== "Salamisim") {
+            $image = "images/salamisim.jpg";
+        }
         echo "<div class='book-card'>
-                <img src='thegreategatsby.jpg' alt='Book Cover'>
+                <img src=$image alt='Book Cover'>
                 <div class='book-title'>" . $row["title_book"] . "</div>
                 <div class='book-author'>by " . $row["author_book"] . "</div>
                 <div class='book-info'>Copies: " . $row["book_copy"] . "</div>
