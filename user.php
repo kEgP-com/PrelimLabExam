@@ -73,7 +73,7 @@ $result = $conn->query($sql);
 </head>
 <body>
 
-<h2>Our Book Collection</h2>
+<h2>Welcome to </h2>
 
 <div class="book-container">
 <?php
