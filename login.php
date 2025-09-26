@@ -10,14 +10,16 @@ if (isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM users WHERE username='$username'";
-    $result = $conn->query($query);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
 
-      
-        if ($password === $user['password']) {
+   
+        if (md5($password) === $user['password']) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
@@ -33,18 +35,19 @@ if (isset($_POST['login'])) {
     } else {
         $error = "User not found!";
     }
+
+    $stmt->close();
 }
 ?>
 
+
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Login</title>
 </head>
-
 <body>
-    <h2>Login</h2>
+    <h2>Logisn</h2>
 
     <?php
     if (isset($error)) {
@@ -66,5 +69,4 @@ if (isset($_POST['login'])) {
     }
     </script>
 </body>
-
 </html>
