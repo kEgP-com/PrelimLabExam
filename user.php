@@ -37,8 +37,8 @@
 
 <h2>List of Books</h2>
 <?php
-    $sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added FROM books"; // change to match your table columns
-$result = $conn->query($sql);
+    $mysql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added FROM books"; // change to match your table columns
+$result = $conn->query($mysql);
 
 // Display in HTML table
 if ($result->num_rows > 0) {
