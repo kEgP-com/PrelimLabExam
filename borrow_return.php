@@ -13,12 +13,12 @@ if ($mysql->connect_error) {
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h2 { color: #333; }
-        form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; }
+        form { margin-bottom: 20px; padding: 10px; border: 1px solid #0d120eff; width: 400px; }
         label { display: block; margin-top: 10px; }
-        input, select, button { margin-top: 5px; padding: 5px; width: 100%; }
+        input, select, button { margin-top: 1px; padding: 1px; width: 100%; }
         table { border-collapse: collapse; width: 80%; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background: #f0f0f0; }
+        th { background: #f9f9f9ff; }
     </style>
 </head>
 <body>
