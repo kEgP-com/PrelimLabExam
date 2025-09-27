@@ -8,10 +8,8 @@ if (!isset($_SESSION['username'])) {
 }
 
 // =================================================================
-// DATABASE CONNECTION (IMPROVED)
+// DATABASE CONNECTION
 // =================================================================
-// Put your database details here.
-// This makes it easier to change them in one place.
 $db_host = "db";
 $db_user = "root";
 $db_pass = "rootpassword";
@@ -19,13 +17,22 @@ $db_name = "library_db";
 
 $mysql = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
-// Check connection
 if ($mysql->connect_error) {
-    // Using die() will stop the script and show an error.
     die("<h2>❌ Database Connection Failed: " . $mysql->connect_error . "</h2>");
 }
 
-// Get the current user's ID from their username (important for tracking borrows)
+// =================================================================
+// !! IMPORTANT !! CONFIGURE YOUR COLUMN NAMES HERE
+// =================================================================
+// 1. Enter the name of the PRIMARY KEY column from your 'books' table.
+$book_table_primary_key = 'isbn_num'; // Example: 'isbn_num' or 'id'
+
+// 2. Enter the name of the FOREIGN KEY column from your 'borrowed_books' table.
+$borrowed_table_foreign_key = 'book_isbn'; // Example: 'book_isbn' or 'book_id'
+// =================================================================
+
+
+// Get the current user's ID from their username
 $current_username = $_SESSION['username'];
 $user_stmt = $mysql->prepare("SELECT id FROM users WHERE username = ?");
 $user_stmt->bind_param("s", $current_username);
@@ -44,61 +51,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- HANDLE BORROW ACTION ---
     if (isset($_POST['borrow'])) {
-        $book_id_to_borrow = $_POST['book_id'];
+        $book_key_to_borrow = $_POST['book_key_to_borrow'];
 
-        // Use a transaction to ensure data integrity
         $mysql->begin_transaction();
-
         try {
-            // 1. Check if the book is available
-            $check_stmt = $mysql->prepare("SELECT avail_book FROM books WHERE id = ? FOR UPDATE");
-            $check_stmt->bind_param("i", $book_id_to_borrow);
+            $check_stmt = $mysql->prepare("SELECT avail_book FROM books WHERE {$book_table_primary_key} = ? FOR UPDATE");
+            $check_stmt->bind_param("s", $book_key_to_borrow);
             $check_stmt->execute();
-            $book_avail = $check_stmt->get_result()->fetch_assoc()['avail_book'];
-            $check_stmt->close();
+            $result = $check_stmt->get_result();
+            if ($result->num_rows > 0) {
+                $book_avail = $result->fetch_assoc()['avail_book'];
 
-            if ($book_avail > 0) {
-                // 2. Decrement the available book count
-                $update_stmt = $mysql->prepare("UPDATE books SET avail_book = avail_book - 1 WHERE id = ?");
-                $update_stmt->bind_param("i", $book_id_to_borrow);
-                $update_stmt->execute();
-                $update_stmt->close();
+                if ($book_avail > 0) {
+                    $update_stmt = $mysql->prepare("UPDATE books SET avail_book = avail_book - 1 WHERE {$book_table_primary_key} = ?");
+                    $update_stmt->bind_param("s", $book_key_to_borrow);
+                    $update_stmt->execute();
+                    $update_stmt->close();
 
-                // 3. Record the borrow action
-                $due_date = date('Y-m-d H:i:s', strtotime('+14 days')); // 2-week due date
-                $insert_stmt = $mysql->prepare("INSERT INTO borrowed_books (user_id, book_id, borrow_date, due_date) VALUES (?, ?, NOW(), ?)");
-                $insert_stmt->bind_param("iis", $user_id, $book_id_to_borrow, $due_date);
-                $insert_stmt->execute();
-                $insert_stmt->close();
+                    $due_date = date('Y-m-d H:i:s', strtotime('+14 days'));
+                    $insert_stmt = $mysql->prepare("INSERT INTO borrowed_books (user_id, {$borrowed_table_foreign_key}, borrow_date, due_date) VALUES (?, ?, NOW(), ?)");
+                    $insert_stmt->bind_param("iss", $user_id, $book_key_to_borrow, $due_date);
+                    $insert_stmt->execute();
+                    $insert_stmt->close();
 
-                $mysql->commit();
-                $action_message = "<font color='green'>✅ Book borrowed successfully! Due in 14 days.</font>";
+                    $mysql->commit();
+                    $action_message = "<font color='green'>✅ Book borrowed successfully! Due in 14 days.</font>";
+                } else {
+                    $mysql->rollback();
+                    $action_message = "<font color='red'>❌ Sorry, that book is no longer available.</font>";
+                }
             } else {
-                $mysql->rollback();
-                $action_message = "<font color='red'>❌ Sorry, that book is no longer available.</font>";
+                 $mysql->rollback();
+                 $action_message = "<font color='red'>❌ Book not found.</font>";
             }
+            $check_stmt->close();
         } catch (mysqli_sql_exception $exception) {
             $mysql->rollback();
-            $action_message = "<font color='red'>❌ An error occurred. Could not borrow book.</font>";
+            $action_message = "<font color='red'>❌ An error occurred. Could not borrow book. " . $exception->getMessage() . "</font>";
         }
     }
 
     // --- HANDLE RETURN ACTION ---
     if (isset($_POST['return'])) {
         $borrow_id_to_return = $_POST['borrow_id'];
-        $book_id_to_return = $_POST['book_id'];
+        $book_key_to_return = $_POST['book_key_to_return'];
 
         $mysql->begin_transaction();
         try {
-            // 1. Mark the book as returned in the borrowed_books table
             $update_borrow_stmt = $mysql->prepare("UPDATE borrowed_books SET return_date = NOW() WHERE id = ? AND user_id = ?");
             $update_borrow_stmt->bind_param("ii", $borrow_id_to_return, $user_id);
             $update_borrow_stmt->execute();
             $update_borrow_stmt->close();
 
-            // 2. Increment the available book count
-            $update_book_stmt = $mysql->prepare("UPDATE books SET avail_book = avail_book + 1 WHERE id = ?");
-            $update_book_stmt->bind_param("i", $book_id_to_return);
+            $update_book_stmt = $mysql->prepare("UPDATE books SET avail_book = avail_book + 1 WHERE {$book_table_primary_key} = ?");
+            $update_book_stmt->bind_param("s", $book_key_to_return);
             $update_book_stmt->execute();
             $update_book_stmt->close();
 
@@ -118,9 +124,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // =================================================================
 $borrowed_list = [];
 $borrowed_stmt = $mysql->prepare(
-    "SELECT bb.id, b.title_book, bb.borrow_date, bb.due_date, bb.book_id
+    "SELECT bb.id, b.title_book, bb.borrow_date, bb.due_date, bb.{$borrowed_table_foreign_key}
      FROM borrowed_books bb
-     JOIN books b ON bb.book_id = b.id
+     JOIN books b ON bb.{$borrowed_table_foreign_key} = b.{$book_table_primary_key}
      WHERE bb.user_id = ? AND bb.return_date IS NULL
      ORDER BY bb.due_date ASC"
 );
@@ -142,7 +148,6 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     $search = trim($_GET['query']);
     $searchPerformed = true;
     
-    // Use prepared statement to prevent SQL injection
     $stmt = $mysql->prepare("SELECT * FROM books WHERE title_book LIKE ? OR author_book LIKE ? OR isbn_num LIKE ?");
     $searchParam = "%" . $search . "%";
     $stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
@@ -209,7 +214,7 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
                                         <td align='center'>
                                             <form method="POST" action="user.php" style="margin:0;">
                                                 <input type="hidden" name="borrow_id" value="<?php echo $borrowed_book['id']; ?>">
-                                                <input type="hidden" name="book_id" value="<?php echo $borrowed_book['book_id']; ?>">
+                                                <input type="hidden" name="book_key_to_return" value="<?php echo $borrowed_book[$borrowed_table_foreign_key]; ?>">
                                                 <input type="submit" name="return" value="Return Book" style="padding:5px 10px;">
                                             </form>
                                         </td>
@@ -225,39 +230,10 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
 
                 <br><hr><br>
 
-                <table width="100%" border="0" cellpadding="15" bgcolor="#ecf0f1">
-                    <tr>
-                        <td align="center">
-                            <h2>🔍 Search for a Book</h2>
-                            <p>Enter a book title, author, or ISBN to search our library</p>
-                            <form method="GET" action="user.php">
-                                <table border="0" align="center">
-                                    <tr>
-                                        <td>
-                                            <input type="text" name="query" size="50" 
-                                                   placeholder="Enter book title, author, or ISBN..." 
-                                                   value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>"
-                                                   style="padding:8px; width:300px;">
-                                        </td>
-                                        <td>
-                                            <input type="submit" value="Search Books" style="padding:8px 20px; width:120px;">
-                                        </td>
-                                    </tr>
-                                </table>
-                            </form>
-                        </td>
-                    </tr>
-                </table>
-
                 <br>
 
                 <table width="100%" border="0" cellpadding="15">
-                    <tr>
-                        <td>
-                            <h2>📋 Search Results</h2>
-                            <?php if ($searchPerformed): ?>
-                                <p><font color="#27ae60"><b>📊 <?php echo count($searchResults); ?> book(s) found</b></font></p>
-                            <?php endif; ?>
+                  
                             
                             <?php
                             if ($searchPerformed) {
@@ -284,7 +260,7 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
                                         echo "<td align='center'>";
                                         if ($row['avail_book'] > 0) {
                                             echo "<form method='POST' action='user.php' style='margin:0;'>
-                                                    <input type='hidden' name='book_id' value='{$row['id']}'>
+                                                    <input type='hidden' name='book_key_to_borrow' value='{$row[$book_table_primary_key]}'>
                                                     <input type='submit' name='borrow' value='Borrow' style='padding:5px 10px;'>
                                                   </form>";
                                         } else {
@@ -298,23 +274,10 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
                                     echo "</table>";
                                 } else {
                                     echo "<table width='100%' border='0' cellpadding='40' bgcolor='#f8f9fa'>
-                                            <tr>
-                                                <td align='center'>
-                                                    <h3>❌ No books found</h3>
-                                                    <p>Try a different search term</p>
-                                                </td>
-                                            </tr>
+                                            <tr><td align='center'><h3>❌ No books found</h3><p>Try a different search term</p></td></tr>
                                           </table>";
                                 }
-                            } else {
-                                echo "<table width='100%' border='0' cellpadding='40' bgcolor='#f8f9fa'>
-                                        <tr>
-                                            <td align='center'>
-                                                <h3>⭐ Ready to search</h3>
-                                                <p>Enter a search term above to find books in our library</p>
-                                            </td>
-                                        </tr>
-                                      </table>";
+                          
                             }
                             ?>
                         </td>
