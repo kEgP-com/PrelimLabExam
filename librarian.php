@@ -1,8 +1,15 @@
 <?php
+session_start();
 
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
 if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);
+}
+
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit;
 }
 
 
@@ -15,7 +22,6 @@ if (isset($_GET['delete'])) {
     header("Location: librarian.php"); 
     exit;
 }
-
 
 if (isset($_POST['update'])) {
     $isbn = $_POST['isbn_num'];
@@ -33,7 +39,6 @@ if (isset($_POST['update'])) {
     exit;
 }
 
-
 $result = $conn->query("SELECT * FROM books");
 ?>
 <!DOCTYPE html>
@@ -41,44 +46,68 @@ $result = $conn->query("SELECT * FROM books");
 <head>
     <title>Librarian - Manage Books</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-        form { margin: 0; }
-        input[type=text], input[type=number] { width: 90%; }
-        button { padding: 4px 8px; margin: 2px; }
-        a { color: red; text-decoration: none; }
+        .container {
+            width: 90%;
+            margin: auto;
+            font-family: Arial, sans-serif;
+        }
+        .table-wrapper {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: center;
+        }
+        button, a {
+            padding: 4px 8px;
+            text-decoration: none;
+        }
+        a {
+            color: red;
+        }
     </style>
 </head>
 <body>
-    <h2>Librarian Panel - Manage Books</h2>
-    <table>
-        <tr>
-            <th>ISBN</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Copies</th>
-            <th>Available</th>
-            <th>Date Added</th>
-            <th>Actions</th>
-        </tr>
-        <?php while ($row = $result->fetch_assoc()): ?>
-        <tr>
-            <form method="post" action="librarian.php">
-                <td><?= htmlspecialchars($row['isbn_num']) ?></td>
-                <td><input type="text" name="title_book" value="<?= htmlspecialchars($row['title_book']) ?>"></td>
-                <td><input type="text" name="author_book" value="<?= htmlspecialchars($row['author_book']) ?>"></td>
-                <td><input type="number" name="book_copy" value="<?= $row['book_copy'] ?>"></td>
-                <td><input type="number" name="avail_book" value="<?= $row['avail_book'] ?>"></td>
-                <td><?= $row['date_added'] ?></td>
-                <td>
-                    <input type="hidden" name="isbn_num" value="<?= $row['isbn_num'] ?>">
-                    <button type="submit" name="update">Update</button>
-                    <a href="librarian.php?delete=<?= $row['isbn_num'] ?>" onclick="return confirm('Delete this book?')">Delete</a>
-                </td>
-            </form>
-        </tr>
-        <?php endwhile; ?>
-    </table>
+    <div class="container">
+
+        <h2>Librarian Panel - Manage Books</h2>
+
+        <a href="librarian.php?logout=true" class="logout-btn">Logout</a>
+
+        <table>
+            <tr>
+                <th>ISBN</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Copies</th>
+                <th>Available</th>
+                <th>Date Added</th>
+                <th>Actions</th>
+            </tr>
+            <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+                <form method="post" action="librarian.php">
+                    <td><?= htmlspecialchars($row['isbn_num']) ?></td>
+                    <td><input type="text" name="title_book" value="<?= htmlspecialchars($row['title_book']) ?>"></td>
+                    <td><input type="text" name="author_book" value="<?= htmlspecialchars($row['author_book']) ?>"></td>
+                    <td><input type="number" name="book_copy" value="<?= $row['book_copy'] ?>"></td>
+                    <td><input type="number" name="avail_book" value="<?= $row['avail_book'] ?>"></td>
+                    <td><?= $row['date_added'] ?></td>
+                    <td>
+                        <input type="hidden" name="isbn_num" value="<?= $row['isbn_num'] ?>">
+                        <button type="submit" name="update">Update</button>
+                        <a href="librarian.php?delete=<?= $row['isbn_num'] ?>" onclick="return confirm('Delete this book?')">Delete</a>
+                    </td>
+                </form>
+            </tr>
+            <?php endwhile; ?>
+        </table>
+
+    </div> 
 </body>
 </html>
