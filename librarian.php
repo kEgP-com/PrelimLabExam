@@ -28,5 +28,7 @@
         echo "</tr>";
     }
     echo "</table>";
-    echo "<a href='login.php'>BACK TO LOGIN</a>";
+    echo "<a href='login.php'>BACK TO LOGIN</a> <br>";
+   
+    echo "<a href='user.php'>EDIT</a>";
 ?>

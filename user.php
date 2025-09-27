@@ -1,13 +1,13 @@
 <?php
-// Database connection
+
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
 
-// Check connection
+
 if ($conn->connect_error) {
     die("<h2>Connection Failed</h2>");
 }
 
-// Query all books
+
 $sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added 
         FROM books";
 $result = $conn->query($sql);
@@ -28,6 +28,24 @@ $result = $conn->query($sql);
             background: #a4c6f1ff;
             padding: 20px;
         }
+        .top-right {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 20px;
+            border: 2px solid #a4c6f1ff;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #a4c6f1ff;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #a4c6f1ff;
+            color: white;
+        }
         .book-container {
             display: flex;
             flex-wrap: wrap;
@@ -47,12 +65,6 @@ $result = $conn->query($sql);
         .book-card:hover {
             transform: scale(1.05);
         }
-        .book-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
         .book-title {
             font-weight: bold;
             margin: 10px 0 5px;
@@ -62,14 +74,19 @@ $result = $conn->query($sql);
             font-size: 14px;
             margin-bottom: 8px;
         }
-        .book-info {
-            font-size: 13px;
-            color: #666;
+       .back-btn {
+        display: inline-block;     
+        padding: 8px 16px;          
+        border: 2px solid #a4c6f1ff; 
+        background-color: #a4c6f1ff;  
+        border-radius: 5px;        
+        text-decoration: none;     
+        color: #a4c6f1ff;            
+        font-weight: bold;
         }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin: 20px;
+        .back-btn:hover {
+        background-color: #a4c6f1ff; 
+        color: white;               
         }
     </style>
 </head>
@@ -81,28 +98,11 @@ $result = $conn->query($sql);
 <?php
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $image = "default.jpg";
 
-        if ($row["title_book"]== "The Great Gatsby") {
-            $image = "images/thegreategatsby.jpg";
-        } elseif ($row["title_book"]== "1984") {
-            $image = "images/1984.jpg";
-        }elseif ($row["title_book"]== "To Kill a Mockingbird") {
-            $image = "images/tokillamockingbird.jpg";
-        }elseif ($row["title_book"]== "Pride and Prejudice") {
-            $image = "images/prideandprejudice.jpg";
-        }elseif ($row["title_book"]== "Salamisim") {
-            $image = "images/salamisim.jpg";
-        } elseif ($row["title_book"] == "The Diary of a Young Girl") {
-            $image = "images/thediary.jpg";
-        }
         echo "<div class='book-card'>
-                <img src=$image alt='Book Cover'>
                 <div class='book-title'>" . $row["title_book"] . "</div>
                 <div class='book-author'>by " . $row["author_book"] . "</div>
-                <div class='book-info'>Copies: " . $row["book_copy"] . "</div>
-                <div class='book-info'>Available: " . $row["avail_book"] . "</div>
-                <div class='book-info'>Added: " . $row["date_added"] . "</div>
+                <a href='librarian.php'>View Details</a>
               </div>";
     }
 } else {
@@ -112,7 +112,8 @@ $conn->close();
 ?>
 </div>
 
-<div class="back-link">
+
+<div class="back-btn">
     <a href="login.php">BACK TO LOGIN</a>
 </div>
 
