@@ -1,19 +1,15 @@
 <?php
 session_start();
 
-// Check if user is logged in as librarian
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'librarian') {
     header("Location: login.php");
     exit;
 }
-
 $mysql = new mysqli("db", "root", "rootpassword", "library_db");
 if ($mysql->connect_error) {
-    echo "<h2>Connection Failed</h2>";
+    echo "Connection Failed";
     exit;
 }
-
-// Handle search functionality
 $searchResults = [];
 $searchPerformed = false;
 
@@ -21,7 +17,6 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     $search = trim($_GET['query']);
     $searchPerformed = true;
     
-    // Use prepared statement to prevent SQL injection
     $stmt = $mysql->prepare("SELECT * FROM books WHERE title_book LIKE ? OR author_book LIKE ? OR isbn_num LIKE ?");
     $searchParam = "%" . $search . "%";
     $stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
@@ -36,154 +31,99 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     $stmt->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System - Librarian</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header Section -->
-    <table width="100%" border="0" cellpadding="15" bgcolor="#2c3e50">
-        <tr>
-            <td align="center" width="25%">
-                <font color="white" size="6"><b>📚 Library Management System - Librarian</b></font>
-            </td>
-            <td align="right" width="30%">
-                <font color="white">
-                    Welcome, Librarian <b><?php echo $_SESSION['username']; ?></b>!<br>
-                    <a href="login.php?logout=true" style="color:white;">Logout</a>
-                </font>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Main Content -->
-    <table width="100%" border="0" cellpadding="20">
-        <tr>
-            <td>
-                <!-- Search Section -->
-                <table width="100%" border="0" cellpadding="15" bgcolor="#ecf0f1">
-                    <tr>
-                        <td align="center">
-                            <h2>🔍 Search for a Book</h2>
-                            <p>Enter a book title, author, or ISBN to search our library</p>
-                            <form method="GET" action="librarian.php">
-                                <table border="0" align="center">
-                                    <tr>
-                                        <td>
-                                            <input type="text" name="query" size="50" 
-                                                   placeholder="Enter book title, author, or ISBN..." 
-                                                   value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>"
-                                                   style="padding:8px; width:300px;">
-                                        </td>
-                                        <td>
-                                            <input type="submit" value="Search Books" style="padding:8px 20px; width:120px;">
-                                        </td>
-                                    </tr>
-                                </table>
-                            </form>
-                        </td>
-                    </tr>
-                </table>
-
-                <br>
-
-                <!-- Results Section -->
-                <table width="100%" border="0" cellpadding="15">
-                    <tr>
-                        <td>
-                            <h2>📋 Search Results</h2>
-                            <?php if ($searchPerformed): ?>
-                                <p><font color="#27ae60"><b>📊 <?php echo count($searchResults); ?> book(s) found</b></font></p>
-                            <?php endif; ?>
-                            
-                            <?php
-                            if ($searchPerformed) {
-                                if (count($searchResults) > 0) {
-                                    echo "<table width='100%' border='1' cellpadding='12' cellspacing='0' style='border-collapse: collapse;'>";
-                                    echo "<tr bgcolor='#34495e'>
-                                            <th width='20%'><font color='white'>📖 TITLE</font></th>
-                                            <th width='15%'><font color='white'>✍️ AUTHOR</font></th>
-                                            <th width='8%'><font color='white'>📚 COPIES</font></th>
-                                            <th width='10%'><font color='white'>✅ AVAILABLE</font></th>
-                                            <th width='12%'><font color='white'>🏷️ ISBN</font></th>
-                                            <th width='15%'><font color='white'>📅 DATE ADDED</font></th>
-                                            <th width='20%'><font color='white'>⚡ ACTIONS</font></th>
-                                          </tr>";
-                                    
-                                    $rowCount = 0;
-                                    foreach ($searchResults as $row) {
-                                        $bgColor = ($rowCount % 2 == 0) ? '#ffffff' : '#f8f9fa';
-                                        echo "<tr bgcolor='$bgColor'>";
-                                        echo "<td><b>" . htmlspecialchars($row['title_book']) . "</b></td>";
-                                        echo "<td>" . htmlspecialchars($row['author_book']) . "</td>";
-                                        echo "<td align='center'>" . $row['book_copy'] . "</td>";
-                                        echo "<td align='center'><b>" . $row['avail_book'] . "</b></td>";
-                                        echo "<td><code>" . $row['isbn_num'] . "</code></td>";
-                                        echo "<td>" . $row['date_added'] . "</td>";
-                                        echo "<td align='center'>
-                                                <button style='padding:5px 10px; margin:2px;'>Edit</button>
-                                                <button style='padding:5px 10px; margin:2px;'>Remove</button>
-                                                <button style='padding:5px 10px; margin:2px;'>Return</button>
-                                              </td>";
-                                        echo "</tr>";
-                                        $rowCount++;
-                                    }
-                                    
-                                    echo "</table>";
-                                } else {
-                                    echo "<table width='100%' border='0' cellpadding='40' bgcolor='#f8f9fa'>
-                                            <tr>
-                                                <td align='center'>
-                                                    <h3>❌ No books found</h3>
-                                                    <p>Try a different search term</p>
-                                                </td>
-                                            </tr>
-                                          </table>";
-                                }
-                            } else {
-                                echo "<table width='100%' border='0' cellpadding='40' bgcolor='#f8f9fa'>
-                                        <tr>
-                                            <td align='center'>
-                                                <h3>⭐ Ready to search</h3>
-                                                <p>Enter a search term above to find books in our library</p>
-                                            </td>
-                                        </tr>
-                                      </table>";
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Librarian Tools Section -->
-                <table width="100%" border="0" cellpadding="15" bgcolor="#f8f9fa">
-                    <tr>
-                        <td>
-                            <h3>👨‍💼 Librarian Management Tools</h3>
-                            <p>As a librarian, you have access to additional management functions:</p>
-                            <ul>
-                                <li>➕ Add new books to the library</li>
-                                <li>✏️ Edit existing book information</li>
-                                <li>📊 Manage book borrowing and returns</li>
-                            </ul>
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Back Link -->
-                <table width="100%" border="0" cellpadding="15">
-                    <tr>
-                        <td>
-                            <a href="login.php">← Back to Login Page</a>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1>📚 Library Management System</h1>
+                <div class="welcome-message">Welcome, Librarian <strong><?php echo $_SESSION['username']; ?></strong></div>
+            </div>
+            <div class="role-badge">Librarian Admin</div>
+        </div>
+        <!-- Search Section -->
+        <div class="card search-section">
+            <h2>🔍 Search Books</h2>
+            <p>Manage library collection by searching books</p>
+            
+            <form method="GET" action="librarian.php" class="search-form">
+                <input type="text" name="query" class="search-input" 
+                       placeholder="Enter book title, author name, or ISBN..." 
+                       value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>">
+                <button type="submit" class="search-button">
+                    <span>Search Books</span>
+                </button>
+            </form>
+        </div>
+        <!-- Results Section -->
+        <div class="card results-section">
+            <h2>📋 Search Results</h2>
+            
+            <?php if ($searchPerformed): ?>
+                <div class="results-count">
+                    📊 Found <?php echo count($searchResults); ?> book(s)
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($searchPerformed): ?>
+                <?php if (count($searchResults) > 0): ?>
+                    <div class="table-container">
+                        <table class="books-table" border="1">
+                            <thead>
+                                <tr>
+                                    <th>📖 Title</th>
+                                    <th>✍️ Author</th>
+                                    <th>📚 Copies</th>
+                                    <th>✅ Available</th>
+                                    <th>🏷️ ISBN</th>
+                                    <th>📅 Date Added</th>
+                                    <th>⚡ Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($searchResults as $row): ?>
+                                <tr>
+                                    <td><strong><?php echo htmlspecialchars($row['title_book']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($row['author_book']); ?></td>
+                                    <td style="text-align: center;"><?php echo $row['book_copy']; ?></td>
+                                    <td style="text-align: center;"><strong><?php echo $row['avail_book']; ?></strong></td>
+                                    <td><code><?php echo $row['isbn_num']; ?></code></td>
+                                    <td><?php echo $row['date_added']; ?></td>
+                                    <td class="actions">
+                                        <button class="action-btn edit-btn">Edit</button>
+                                        <button class="action-btn remove-btn">Remove</button>
+                                        <button class="action-btn return-btn">Return</button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="message">
+                        <h3>📭 No Books Found</h3>
+                        <p>Try adjusting your search terms or add new books to the collection</p>
+                    </div>
+                <?php endif; ?>
+            <?php else: ?>
+                <div class="message">
+                    <h3>⭐ Management Dashboard</h3>
+                    <p>Search above to manage books or use the tools below</p>
+                </div>
+            <?php endif; ?>
+        </div>
+        <!-- Back to Login -->
+        <div class="back-link">
+            <a href="login.php">← Back to Login Page</a>
+        </div>
+    </div>
 </body>
 </html>

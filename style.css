@@ -1,0 +1,185 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root {
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --success: #68d391;
+    --danger: #fc8181;
+    --warning: #f6ad55;
+    --light: #f7fafc;
+    --dark: #2d3748;
+    --white: #ffffff;
+    --gray: #718096;
+    --border: #e2e8f0;
+    --radius: 8px;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--light);
+    min-height: 100vh;
+    line-height: 1.6;
+    color: var(--dark);
+}
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+}
+.header {
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--radius);
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border);
+}
+.header-content h1 {
+    color: var(--secondary);
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+.welcome-message {
+    color: var(--gray);
+    font-size: 1.1rem;
+}
+.role-badge {
+    background: var(--primary);
+    color: var(--white);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+.card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border);
+}
+.card h2 {
+    color: var(--secondary);
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+.search-section {
+    text-align: center;
+}
+.search-form {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.search-input {
+    padding: 15px 20px;
+    width: 400px;
+    max-width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+}
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+.search-button {
+    padding: 15px 30px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.results-count {
+    color: var(--dark);
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.books-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+.books-table th {
+    background: var(--light);
+    color: var(--dark);
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+}
+.books-table td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+.books-table tr:hover {
+    background: var(--light);
+}
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid;
+}
+.edit-btn { background: var(--warning); color: var(--white); }
+.remove-btn { background: var(--danger); color: var(--white); }
+.return-btn { background: var(--success); color: var(--white); }
+.message {
+    text-align: center;
+    padding: 60px 30px;
+}
+.message h3 {
+    color: var(--secondary);
+    margin-bottom: 15px;
+}
+.back-link {
+    text-align: center;
+    margin-top: 30px;
+}
+.back-link a {
+    color: var(--primary);
+    text-decoration: none;
+    padding: 12px 30px;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    font-weight: 600;
+}
+.back-link a:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+@media (max-width: 768px) {
+    .container { padding: 15px; }
+    .header { flex-direction: column; text-align: center; gap: 15px; }
+    .header-content h1 { font-size: 2rem; }
+    .search-form { flex-direction: column; }
+    .search-input { width: 100%; }
+    .actions { flex-direction: column; }
+}
+.card, .books-table {
+    animation: fadeIn 0.6s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
