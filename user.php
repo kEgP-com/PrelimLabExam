@@ -22,9 +22,11 @@ $result = $conn->query($sql);
             font-family: Arial, sans-serif;
             background: #f8f9fa;
         }
-        h2 {
+        h1 {
             text-align: center;
             margin-top: 20px;
+            background: #a4c6f1ff;
+            padding: 20px;
         }
         .book-container {
             display: flex;
@@ -34,7 +36,7 @@ $result = $conn->query($sql);
             gap: 20px;
         }
         .book-card {
-            background: #fff;
+            background: #a4c6f1ff;
             width: 200px;
             padding: 15px;
             border-radius: 10px;
@@ -73,7 +75,7 @@ $result = $conn->query($sql);
 </head>
 <body>
 
-<h2>Welcome to </h2>
+<h1>Welcome to Library Management System</h1>
 
 <div class="book-container">
 <?php
@@ -91,6 +93,8 @@ if ($result->num_rows > 0) {
             $image = "images/prideandprejudice.jpg";
         }elseif ($row["title_book"]== "Salamisim") {
             $image = "images/salamisim.jpg";
+        } elseif ($row["title_book"] == "The Diary of a Young Girl") {
+            $image = "images/thediary.jpg";
         }
         echo "<div class='book-card'>
                 <img src=$image alt='Book Cover'>
