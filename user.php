@@ -11,16 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ONLINE LIBRARY</title>
-    <style>
-        body { font-family: sans-serif; max-width: 1000px; margin: auto; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .message { padding: 10px; margin-bottom: 20px; border-radius: 5px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        .borrowed-text { color: #888; font-style: italic; }
-    </style>
+   
 </head>
 <body>
     <h2>Hello Student! Search for a Book</h2>
