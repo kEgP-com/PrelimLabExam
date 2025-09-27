@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$conn = new mysqli("db", "root", "rootpassword", "library_db");
+$conn = new mysqli("host", "root", "rootpassword", "library");
 if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);
 }
