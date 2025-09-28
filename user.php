@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -116,3 +117,4 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     </div>
 </body>
 </html>
+
