@@ -1,106 +1,92 @@
 <?php
-$conn = new mysqli("db", "root", "rootpassword", "library_db");
+// Librarian book management (Search Feature Only for USER)
+session_start();
 
-if ($conn->connect_error) {
-    die("<h2>Connection Failed</h2>");
+if (isset($_POST['logout'])) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit;
 }
 
-$sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added FROM books";
-$result = $conn->query($sql);
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'librarian') {
+    header("Location: login.php");
+    exit;
+}
+
+$conn = new mysqli("db", "root", "rootpassword", "library_db");
+if ($conn->connect_error) {
+    die("Can't connect: " . $conn->connect_error);
+}
+
+
+   // Student 4 Feature: Search Books
+
+$searchQuery = "";
+if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+    $searchQuery = $conn->real_escape_string(trim($_GET['search']));
+    $result = $conn->query("SELECT * FROM books 
+                            WHERE title LIKE '%$searchQuery%' 
+                               OR author LIKE '%$searchQuery%' 
+                               OR isbn LIKE '%$searchQuery%'
+                            ORDER BY date_added DESC");
+} else {
+    $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
+}
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Books List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-        }
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-            background: #a4c6f1ff;
-            padding: 20px;
-        }
-        .book-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px;
-            gap: 20px;
-        }
-        .book-card {
-            background: #a4c6f1ff;
-            width: 200px;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        .book-card:hover {
-            transform: scale(1.05);
-        }
-        .book-title {
-            font-weight: bold;
-            margin: 10px 0 5px;
-        }
-        .book-author {
-            color: #555;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        
-        .back-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 20px auto;
-            border: 2px solid #333;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            background-color: #f9f9f9;
-            transition: 0.3s;
-        }
-        .back-btn:hover {
-            background-color: #333;
-            color: white;   
-        }
-        .links {
-            text-align: left;
-        }
-    </style>
+    <title>Librarian Dashboard - Search</title>
+    <link rel="stylesheet" href="style_library.css">
 </head>
 <body>
+    <div class="header">
+        <h2>Librarian Dashboard (Search Only)</h2>
+        <form method="post" style="margin:0;">
+            <button type="submit" name="logout" class="logout-btn">Logout</button>
+        </form>
+    </div>
 
-<h1>Welcome to Library Management System</h1>
+    <div class="book-list">
+        <h3>Book List</h3>
 
-<div class="book-container">
-<?php
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        echo "<div class='book-card'>
-                <div class='book-title'>" . $row["title_book"] . "</div>
-                <div class='book-author'>by " . $row["author_book"] . "</div>
-                <a href='librarian.php'>View Details</a>
+        <!-- Student 4 Feature: Search Form -->
+        <form method="get" action="librarian.php" class="search-form">
+            <input type="text" name="search" placeholder="Search by Title, Author, or ISBN"
+                   value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
+            <button type="submit">Search</button>
+            <a href="librarian.php"><button type="button">Clear</button></a>
+        </form>
 
-              </div>";
-    }
-} else {
-    echo "<p style='text-align:center;'>No books found.</p>";
-}
-$conn->close();
-?>
-</div>
-
-
-<div class="links">
-    <a href="login.php" class="back-btn">LOG OUT</a>
-</div>
-
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>ISBN</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Copies</th>
+                    <th>Available</th>
+                    <th>Date Added</th>
+                </tr>
+                <?php if ($result && $result->num_rows > 0) { 
+                    while ($row = $result->fetch_assoc()) { ?>
+                <tr>
+                    <td><?php echo $row['isbn']; ?></td>
+                    <td><?php echo $row['title']; ?></td>
+                    <td><?php echo $row['author']; ?></td>
+                    <td><?php echo $row['copies']; ?></td>
+                    <td><?php echo $row['available']; ?></td>
+                    <td><?php echo $row['date_added']; ?></td>
+                </tr>
+                <?php } } else { ?>
+                <tr>
+                    <td colspan="6">No books found.</td>
+                </tr>
+                <?php } ?>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
-

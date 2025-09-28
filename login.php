@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
+
+
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
 if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);

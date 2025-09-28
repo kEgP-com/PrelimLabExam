@@ -21,7 +21,6 @@ $conn->query("INSERT IGNORE INTO users (username, password, role) VALUES
     ('user1', '1234', 'user')
 ");
 
-
 $conn->query("DROP TABLE IF EXISTS books");
 
 

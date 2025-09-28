@@ -1,5 +1,5 @@
 <?php
-// Librarian book management (View Catalog Feature Only)
+// Librarian book management (Search Feature Only)
 session_start();
 
 if (isset($_POST['logout'])) {
@@ -19,28 +19,46 @@ if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);
 }
 
-  // Student 3 Feature: View Catalog
+  // Student 4 Feature: Search Books
 
-$result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
+$searchQuery = "";
+if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+    $searchQuery = $conn->real_escape_string(trim($_GET['search']));
+    $result = $conn->query("SELECT * FROM books 
+                            WHERE title LIKE '%$searchQuery%' 
+                               OR author LIKE '%$searchQuery%' 
+                               OR isbn LIKE '%$searchQuery%'
+                            ORDER BY date_added DESC");
+} else {
+    $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Librarian Dashboard - View Catalog</title>
+    <title>Librarian Dashboard - Search</title>
     <link rel="stylesheet" href="style_library.css">
 </head>
 <body>
     <div class="header">
-        <h2>Librarian Dashboard (View Catalog Only)</h2>
+        <h2>Librarian Dashboard (Search Only)</h2>
         <form method="post" style="margin:0;">
             <button type="submit" name="logout" class="logout-btn">Logout</button>
         </form>
     </div>
 
     <div class="book-list">
-        <h3>Book Catalog</h3>
+        <h3>Book List</h3>
 
-        <!-- Student 3 Feature: Browse/View Catalog -->
+        <!-- Student 4 Feature: Search Form -->
+        <form method="get" action="librarian.php" class="search-form">
+            <input type="text" name="search" placeholder="Search by Title, Author, or ISBN"
+                   value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
+            <button type="submit">Search</button>
+            <a href="librarian.php"><button type="button">Clear</button></a>
+        </form>
+
         <div class="table-container">
             <table>
                 <tr>
