@@ -24,7 +24,7 @@ $messageBorrow = "";
 $editBook = null;
 
 
-// Helper: Generate ISBN like B001, B002, ...
+
 function generateISBN($conn) {
     $result = $conn->query("SELECT isbn_num FROM books ORDER BY CAST(SUBSTRING(isbn_num, 2) AS UNSIGNED) DESC LIMIT 1");
 
