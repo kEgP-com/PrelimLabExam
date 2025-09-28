@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$conn = new mysqli("host", "root", "rootpassword", "library");
+$conn = new mysqli("db", "root", "rootpassword", "library_db");
 if ($conn->connect_error) {
     die("Can't connect: " . $conn->connect_error);
 }
@@ -10,16 +10,14 @@ if (isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $query = "SELECT * FROM users WHERE username='$username'";
+    $result = $conn->query($query);
 
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
 
-   
-        if (md5($password) === $user['password']) {
+      
+        if ($password === $user['password']) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
@@ -35,19 +33,18 @@ if (isset($_POST['login'])) {
     } else {
         $error = "User not found!";
     }
-
-    $stmt->close();
 }
 ?>
 
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Login</title>
 </head>
+
 <body>
-    <h2>Logisn</h2>
+    <h2>Login</h2>
 
     <?php
     if (isset($error)) {
@@ -69,4 +66,5 @@ if (isset($_POST['login'])) {
     }
     </script>
 </body>
+
 </html>
