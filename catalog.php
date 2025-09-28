@@ -1,122 +1,146 @@
 <?php
 session_start();
 
-// Redirect if not logged in
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
+$conn = new mysqli("db", "root", "rootpassword", "library_db");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// =================================================================
-// DATABASE CONNECTION
-// =================================================================
-$db_host = "db";
-$db_user = "root";
-$db_pass = "rootpassword";
-$db_name = "library_db";
+$message = "";
 
-$mysql = new mysqli($db_host, $db_user, $db_pass, $db_name);
+// Borrow a book
+if (isset($_POST['borrow_book'])) {
+    $isbn = $conn->real_escape_string($_POST['isbn']);
+    $borrower_name = $conn->real_escape_string($_POST['borrower_name']);
+    $return_date = $conn->real_escape_string($_POST['return_date']);
+    $borrow_date = date("Y-m-d");
 
-if ($mysql->connect_error) {
-    die("<h2>❌ Database Connection Failed: " . $mysql->connect_error . "</h2>");
+    // Check availability
+    $check = $conn->query("SELECT avail_book FROM books WHERE isbn_num='$isbn'");
+    $book = $check->fetch_assoc();
+
+    if ($book && $book['avail_book'] > 0) {
+        $conn->query("INSERT INTO borrowed_books 
+                      (book_isbn, borrower_name, borrow_date, return_date, status)
+                      VALUES ('$isbn', '$borrower_name', '$borrow_date', '$return_date', 'pending')");
+
+        // Decrement availability
+        $conn->query("UPDATE books SET avail_book = avail_book - 1 WHERE isbn_num='$isbn'");
+    }
 }
 
-// =================================================================
-// CONFIG
-// =================================================================
-$book_table_primary_key = 'isbn_num';
 
-// =================================================================
-// FETCH ALL BOOKS
-// =================================================================
-$all_books = [];
-$result = $mysql->query("SELECT * FROM books ORDER BY title_book ASC");
-while ($row = $result->fetch_assoc()) {
-    $all_books[] = $row;
+$searchQuery = "";
+if (isset($_GET['search'])) {
+    $searchQuery = $conn->real_escape_string($_GET['search']);
+    $sql = "SELECT * FROM books 
+            WHERE isbn_num LIKE '%$searchQuery%' 
+               OR title_book LIKE '%$searchQuery%' 
+               OR author_book LIKE '%$searchQuery%' 
+            ORDER BY date_added DESC";
+} else {
+    $sql = "SELECT * FROM books ORDER BY date_added DESC";
 }
+$result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-<meta charset="UTF-8">
-<title>Book Catalog</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f0f2f5;
-}
-.book-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 20px;
-    gap: 20px;
-}
-.book-card {
-    background: #fff;
-    width: 220px;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.book-card:hover { transform: scale(1.05); }
-.book-title { font-weight: bold; font-size: 1.1em; margin: 10px 0 5px; }
-.book-author { color: #555; font-size: 14px; margin-bottom: 15px; }
-.book-card form input[type="submit"] {
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-.not-available { color: #e74c3c; font-weight: bold; }
-</style>
+    <title>Book Catalog</title>
+    <link rel="stylesheet" href="catalog.css">
 </head>
+
 <body>
-    <table border="0" cellpadding="15" bgcolor="#2c3e50" width="100%">
+    <!-- Merge into develop branch from student 3: Borrow and view catalog book feauture by Rachel Ramos -->
+    <h2>Library Catalog</h2>
+
+    <?php if ($message) echo "<p class='message'>$message</p>"; ?>
+
+    <div class="controls">
+        <form id="borrowerForm">
+            <input type="text" id="borrowerName" name="borrower_name" placeholder="Your Name" required>
+            <input type="date" id="returnDate" name="return_date" required>
+        </form>
+
+        <!-- Merge into develop branch from student 3: Search book feauture by Yasmien Regidor -->
+
+        <form method="get" action="">
+            <input type="text" name="search" placeholder="Search books..."
+                value="<?php echo htmlspecialchars($searchQuery); ?>">
+            <button type="submit">Search</button>
+            <a href="catalog.php" style="text-decoration:none;">
+                <button type="button">Clear</button>
+            </a>
+        </form>
+    </div>
+
+
+    <table>
         <tr>
-            <td><font color="white" size="6"><b>📚 Book Catalog</b></font></td>
-            <td align="right">
-                <font color="white">
-                    Welcome, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>!<br>
-                    <a href="login.php?logout=true" style="color:white;">Logout</a> |
-                    <a href="user.php" style="color:white;">My Books</a>
-                </font>
+            <th>ISBN</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Copies</th>
+            <th>Available</th>
+            <th>Date Added</th>
+            <th>Action</th>
+        </tr>
+        <?php if ($result && $result->num_rows > 0) { 
+            while ($row = $result->fetch_assoc()) { ?>
+        <tr>
+            <td><?php echo $row['isbn_num']; ?></td>
+            <td><?php echo $row['title_book']; ?></td>
+            <td><?php echo $row['author_book']; ?></td>
+            <td><?php echo $row['book_copy']; ?></td>
+            <td><?php echo $row['avail_book']; ?></td>
+            <td><?php echo $row['date_added']; ?></td>
+            <td>
+                <?php if ($row['avail_book'] > 0) { ?>
+                <form method="post" name="borrow_form"
+                    onsubmit="return confirmBorrow('<?php echo $row['title_book']; ?>')">
+                    <input type="hidden" name="isbn" value="<?php echo $row['isbn_num']; ?>">
+                    <input type="hidden" name="borrower_name" class="hiddenName">
+                    <input type="hidden" name="return_date" class="hiddenDate">
+                    <button type="submit" name="borrow_book" class="borrow-btn">Borrow</button>
+                </form>
+
+                <?php } else { ?>
+                <span style="color:red; font-weight:bold;">Not Available</span>
+                <?php } ?>
             </td>
         </tr>
+        <?php } } else { ?>
+        <tr>
+            <td colspan="7">No books available.</td>
+        </tr>
+        <?php } ?>
     </table>
 
-    <h2 style="text-align:center;">📚 Book Catalog</h2>
-    <div class="book-container">
-        <?php if (count($all_books) > 0): ?>
-            <?php foreach ($all_books as $book): ?>
-                <div class="book-card">
-                    <div>
-                        <div class="book-title"><?php echo htmlspecialchars($book["title_book"]); ?></div>
-                        <div class="book-author">by <?php echo htmlspecialchars($book["author_book"]); ?></div>
-                    </div>
-                    <div>
-                        <?php if ($book['avail_book'] > 0): ?>
-                            <form method="POST" action="user.php">
-                                <input type="hidden" name="book_key_to_borrow" value="<?php echo htmlspecialchars($book[$book_table_primary_key]); ?>">
-                                <input type="submit" name="borrow" value="Borrow (<?php echo $book['avail_book']; ?> Available)">
-                            </form>
-                        <?php else: ?>
-                            <div class="not-available">Not Available</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p style="text-align:center;">No books found.</p>
-        <?php endif; ?>
-    </div>
+    <a href="user.php" class="back-btn">Back</a>
+
+    <script>
+    function confirmBorrow(bookTitle) {
+        return confirm("Are you sure you want to borrow: " + bookTitle + "?");
+    }
+
+    document.querySelectorAll("form[name='borrow_form']").forEach(f => {
+        f.addEventListener("submit", function(e) {
+            let name = document.getElementById("borrowerName").value;
+            let date = document.getElementById("returnDate").value;
+            if (!name || !date) {
+                alert("Please enter your name and return date first.");
+                e.preventDefault();
+                return false;
+            }
+            this.querySelector(".hiddenName").value = name;
+            this.querySelector(".hiddenDate").value = date;
+        });
+    });
+    </script>
+
+
 </body>
+
 </html>
