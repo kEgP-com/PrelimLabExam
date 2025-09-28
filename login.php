@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: dashboard.php");
                 exit;
             } else {
-                header("Location: user.php");
+                header("Location: catalog.php");
                 exit;
             }
         } else {
