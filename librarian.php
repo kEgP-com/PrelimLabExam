@@ -175,7 +175,6 @@ if (isset($_SESSION['flash'])) {
     </div>
     <!-- Merge into develop branch from student 1: Create book feauture by Kin Prudente -->
     <div class="dashboard">
-
         <div class="box">
             <h3><?php echo $editBook ? "Edit Book" : "Add New Book"; ?></h3>
             <?php if ($messageBook) { ?>
@@ -213,7 +212,7 @@ if (isset($_SESSION['flash'])) {
 
 
         <!-- Merge into develop branch from student 5: feature/borrow and return book feauture by Marc Reantaso-->
-        < <div class="borrow-history">
+        <div class="borrow-history">
             <h3>Borrowed & Returned History</h3>
             <?php if ($messageBorrow) { ?>
             <p class="message success"><?php echo $messageBorrow; ?></p>
@@ -254,7 +253,7 @@ if (isset($_SESSION['flash'])) {
                     <?php } ?>
                 </table>
             </div>
-    </div>
+        </div>
     </div>
 
     <!-- Merge into develop branch from student 3: Borrow and view catalog book feauture by Rachel Ramos -->
