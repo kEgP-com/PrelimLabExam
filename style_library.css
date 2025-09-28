@@ -139,3 +139,71 @@ body {
 .delete-btn:hover {
     background: #c0392b;
 }
+.search-form {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.search-form input[type="text"] {
+    padding: 8px;
+    width: 60%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+.search-btn:hover {
+    background: #2980b9;
+}
+
+.clear-btn {
+    background: #7f8c8d;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-left: 5px;
+}
+.clear-btn:hover {
+    background: #626e70;
+}
+
+    .search-form {
+        margin-bottom: 10px;
+    }
+
+    .search-form input {
+        padding: 5px;
+    }
+
+    .search-form button {
+        padding: 6px 12px;
+    }
+
+    .table-container {
+        max-height: 300px;
+        /* fixed height */
+        overflow-y: auto;
+        /* scroll down if overflow */
+        border: 1px solid #ccc;
+    }
+
+    .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-container th,
+    .table-container td {
+        padding: 8px;
+        border: 1px solid #ccc;
+        text-align: center;
+    }

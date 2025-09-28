@@ -22,8 +22,7 @@ if ($conn->connect_error) {
 $message = "";
 $editBook = null;
 
-
-//Merge from student 1 : Create book features
+// Merge from student 1 : Create book features by Mr. Prudente
 // Add Book
 if (isset($_POST['add_book'])) {
     $isbn = $conn->real_escape_string($_POST['isbn']);
@@ -43,7 +42,8 @@ if (isset($_POST['add_book'])) {
     }
 }
 
-// Merge From Student 2: Edit and Delete feature
+// Merge from student 2 :Edit and Delete Features on the book by Mr. Reyes
+// Edit
 if (isset($_GET['edit'])) {
     $isbn = $conn->real_escape_string($_GET['edit']);
     $result = $conn->query("SELECT * FROM books WHERE isbn='$isbn'");
@@ -52,9 +52,9 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// Update Book 
+// Update
 if (isset($_POST['update_book'])) {
-    $old_isbn = $conn->real_escape_string($_POST['old_isbn']); // hidden input
+    $old_isbn = $conn->real_escape_string($_POST['old_isbn']);
     $isbn = $conn->real_escape_string($_POST['isbn']);
     $title = $conn->real_escape_string($_POST['title']);
     $author = $conn->real_escape_string($_POST['author']);
@@ -73,7 +73,7 @@ if (isset($_POST['update_book'])) {
     }
 }
 
-// Delete Book
+// Delete
 if (isset($_GET['delete'])) {
     $isbn = $conn->real_escape_string($_GET['delete']);
     $sql = "DELETE FROM books WHERE isbn='$isbn'";
@@ -84,8 +84,18 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Get All Books
-$result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
+// Search
+$searchQuery = "";
+if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+    $searchQuery = $conn->real_escape_string(trim($_GET['search']));
+    $result = $conn->query("SELECT * FROM books 
+                            WHERE title LIKE '%$searchQuery%' 
+                               OR author LIKE '%$searchQuery%' 
+                               OR isbn LIKE '%$searchQuery%'
+                            ORDER BY date_added DESC");
+} else {
+    $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
+}
 ?>
 
 <!DOCTYPE html>
@@ -132,41 +142,53 @@ $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
         </form>
     </div>
 
+    <!-- This was merged together in the same table by Ms. Ramos and Ms. Regidor before merging into develop branch-->
+    <!-- Merge from student 3 into develop :  browse and view catalog -->
     <div class="book-list">
         <h3>Book List</h3>
-        <table>
-            <tr>
-                <th>ISBN</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Copies</th>
-                <th>Available</th>
-                <th>Date Added</th>
-                <th>Action</th>
-            </tr>
-            <?php if ($result && $result->num_rows > 0) { 
-                while ($row = $result->fetch_assoc()) { ?>
-            <tr>
-                <td><?php echo isset($row['isbn']) ? $row['isbn'] : ''; ?></td>
-                <td><?php echo isset($row['title']) ? $row['title'] : ''; ?></td>
-                <td><?php echo isset($row['author']) ? $row['author'] : ''; ?></td>
-                <td><?php echo isset($row['copies']) ? $row['copies'] : ''; ?></td>
-                <td><?php echo isset($row['available']) ? $row['available'] : ''; ?></td>
-                <td><?php echo isset($row['date_added']) ? $row['date_added'] : ''; ?></td>
-                <td>
-                    <a href="?edit=<?php echo $row['isbn']; ?>"><button type="button" class="edit-btn">Edit</button></a>
-                    <a href="?delete=<?php echo $row['isbn']; ?>"
-                        onclick="return confirm('Are you sure you want to delete this book?')">
-                        <button type="button" class="delete-btn">Delete</button>
-                    </a>
-                </td>
-            </tr>
-            <?php } } else { ?>
-            <tr>
-                <td colspan="7">No books found.</td>
-            </tr>
-            <?php } ?>
-        </table>
+
+        <!-- Merge from student4 into develop :  Search books feature.  -->
+        <form method="get" action="librarian.php" class="search-form">
+            <input type="text" name="search" placeholder="Search by Title, Author, or ISBN"
+                value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
+            <button type="submit">Search</button>
+            <a href="librarian.php"><button type="button">Clear</button></a>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>ISBN</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Copies</th>
+                    <th>Available</th>
+                    <th>Date Added</th>
+                    <th>Action</th>
+                </tr>
+                <?php if ($result && $result->num_rows > 0) { 
+                    while ($row = $result->fetch_assoc()) { ?>
+                <tr>
+                    <td><?php echo $row['isbn']; ?></td>
+                    <td><?php echo $row['title']; ?></td>
+                    <td><?php echo $row['author']; ?></td>
+                    <td><?php echo $row['copies']; ?></td>
+                    <td><?php echo $row['available']; ?></td>
+                    <td><?php echo $row['date_added']; ?></td>
+                    <td>
+                        <a href="?edit=<?php echo $row['isbn']; ?>"><button type="button">Edit</button></a>
+                        <a href="?delete=<?php echo $row['isbn']; ?>" onclick="return confirm('Delete this book?')">
+                            <button type="button">Delete</button>
+                        </a>
+                    </td>
+                </tr>
+                <?php } } else { ?>
+                <tr>
+                    <td colspan="7">No books found.</td>
+                </tr>
+                <?php } ?>
+            </table>
+        </div>
     </div>
 </body>
 
