@@ -140,6 +140,26 @@ $borrowed_stmt->close();
 
 
 // =================================================================
+// (NEW) FETCH USER'S BORROW HISTORY
+// =================================================================
+$borrow_history_list = [];
+$history_stmt = $mysql->prepare(
+    "SELECT b.title_book, bb.borrow_date, bb.return_date
+     FROM borrowed_books bb
+     JOIN books b ON bb.{$borrowed_table_foreign_key} = b.{$book_table_primary_key}
+     WHERE bb.user_id = ? AND bb.return_date IS NOT NULL
+     ORDER BY bb.return_date DESC"
+);
+$history_stmt->bind_param("i", $user_id);
+$history_stmt->execute();
+$history_result = $history_stmt->get_result();
+while ($row = $history_result->fetch_assoc()) {
+    $borrow_history_list[] = $row;
+}
+$history_stmt->close();
+
+
+// =================================================================
 // HANDLE BOOK SEARCH (GET REQUEST)
 // =================================================================
 $searchResults = [];
@@ -227,13 +247,70 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
                         </td>
                     </tr>
                 </table>
+                
+                <br>
+
+                <table width="100%" border="0" cellpadding="15">
+                    <tr>
+                        <td>
+                            <h2>📜 Borrow History</h2>
+                            <?php if (count($borrow_history_list) > 0): ?>
+                                <table width='100%' border='1' cellpadding='12' cellspacing='0' style='border-collapse: collapse;'>
+                                    <tr bgcolor='#34495e'>
+                                        <th><font color='white'>TITLE</font></th>
+                                        <th><font color='white'>BORROWED ON</font></th>
+                                        <th><font color='white'>RETURNED ON</font></th>
+                                    </tr>
+                                    <?php foreach ($borrow_history_list as $history_item): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($history_item['title_book']); ?></td>
+                                        <td><?php echo date("F j, Y", strtotime($history_item['borrow_date'])); ?></td>
+                                        <td><?php echo date("F j, Y", strtotime($history_item['return_date'])); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </table>
+                            <?php else: ?>
+                                <p>You have no past borrowed books.</p>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </table>
 
                 <br><hr><br>
+
+                <table width="100%" border="0" cellpadding="15" bgcolor="#ecf0f1">
+                    <tr>
+                        <td align="center">
+                            <h2>🔍 Search for a Book You Want To Borrow</h2>
+                            <p>Enter a book title, author, or ISBN to search our library</p>
+                            <form method="GET" action="user.php">
+                                <table border="0" align="center">
+                                    <tr>
+                                        <td>
+                                            <input type="text" name="query" size="50" 
+                                                   placeholder="Enter book title, author, or ISBN..." 
+                                                   value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>"
+                                                   style="padding:8px; width:300px;">
+                                        </td>
+                                        <td>
+                                            <input type="submit" value="Search Books" style="padding:8px 20px; width:120px;">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
 
                 <br>
 
                 <table width="100%" border="0" cellpadding="15">
-                  
+                    <tr>
+                        <td>
+                            <h2>📋 Search Results</h2>
+                            <?php if ($searchPerformed): ?>
+                                <p><font color="#27ae60"><b>📊 <?php echo count($searchResults); ?> book(s) found</b></font></p>
+                            <?php endif; ?>
                             
                             <?php
                             if ($searchPerformed) {
@@ -277,7 +354,10 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
                                             <tr><td align='center'><h3>❌ No books found</h3><p>Try a different search term</p></td></tr>
                                           </table>";
                                 }
-                          
+                            } else {
+                                echo "<table width='100%' border='0' cellpadding='40' bgcolor='#f8f9fa'>
+                                        <tr><td align='center'><h3>⭐ Ready to search</h3><p>Enter a search term above to find books in our library</p></td></tr>
+                                      </table>";
                             }
                             ?>
                         </td>
