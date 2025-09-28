@@ -95,8 +95,7 @@ $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
         <?php if ($message) echo "<p class='message'>$message</p>"; ?>
 
         <form method="post" action="">
-            ISBN: <input type="text" name="isbn" value="<?php echo $editBook['isbn'] ?? ''; ?>"
-                <?php echo $editBook ? 'readonly' : ''; ?> required><br>
+            ISBN: <input type="text" name="isbn" value="<?php echo $editBook['isbn'] ?? ''; ?>" required><br>
             Title: <input type="text" name="title" value="<?php echo $editBook['title'] ?? ''; ?>" required><br>
             Author: <input type="text" name="author" value="<?php echo $editBook['author'] ?? ''; ?>" required><br>
             Copies: <input type="number" name="copies" value="<?php echo $editBook['copies'] ?? '1'; ?>" min="1"
@@ -114,6 +113,7 @@ $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
             <?php } ?>
         </form>
     </div>
+
 
     <div class="book-list">
         <h3>Book List</h3>
