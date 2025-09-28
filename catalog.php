@@ -1,147 +1,102 @@
-```php
 <?php
-// Database connection
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
+
 if ($conn->connect_error) {
-    die("Connection Failed: " . $conn->connect_error);
+    die("<h2>Connection Failed</h2>");
 }
 
-// If may isbn sa URL → filter specific book, else show all
-if (isset($_GET['isbn'])) {
-    $isbn = $conn->real_escape_string($_GET['isbn']);
-    $sql = "SELECT * FROM books WHERE isbn_num = '$isbn'";
+if (isset($_GET['title'])) {
+    $title = $conn->real_escape_string($_GET['title']);
+    $sql = "SELECT * FROM books WHERE title_book = '$title'";
+    $result = $conn->query($sql);
 } else {
-    $sql = "SELECT * FROM books";
+    die("No book selected.");
 }
-$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Library Catalog</title>
+    <title>Book Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f7f9fa;
+            background: #f8f9fa;
+        }
+        h1 {
             text-align: center;
-        }
-        .book-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px;
-            gap: 20px;
-        }
-        .book-card {
-            background-color: #a8c7f0;
-            padding: 15px;
-            border-radius: 12px;
-            width: 200px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        .book-card h3 {
-            margin: 0;
-        }
-        .book-card a {
-            display: inline-block;
-            margin-top: 10px;
-            color: purple;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .book-card a:hover {
-            text-decoration: underline;
+            margin-top: 20px;
+            background: #a4c6f1;
+            padding: 20px;
         }
         table {
-            border-collapse: collapse;
-            width: 80%;
             margin: 20px auto;
-            border: 2px solid skyblue;
+            border-collapse: collapse;
+            width: 70%;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         th, td {
-            border: 1px solid skyblue;
-            padding: 10px;
+            border: 1px solid #ccc;
+            padding: 12px;
             text-align: center;
         }
         th {
-            font-weight: bold;
+            background: #a4c6f1;
+            color: white;
         }
         .back-btn {
-            display: inline-block;
-            margin: 20px;
-            padding: 8px 15px;
-            border: 2px solid black;
-            text-decoration: none;
-            font-weight: bold;
-            color: black;
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border: 2px solid #333;
             border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            transition: 0.3s;
         }
         .back-btn:hover {
-            background-color: lightgray;
+            background-color: #333;
+            color: white;
         }
     </style>
 </head>
 <body>
 
-<h2>Library Catalog</h2>
+<h1>Book Details</h1>
 
-<?php if (!isset($_GET['isbn'])) { ?>
-    <!-- Show book cards -->
-    <div class="book-container">
-        <div class="book-card">
-            <h3>The Great Gatsby</h3>
-            <p>by F. Scott Fitzgerald</p>
-            <a href="?isbn=B001">View Details</a>
-        </div>
-        <div class="book-card">
-            <h3>1984</h3>
-            <p>by George Orwell</p>
-            <a href="?isbn=B002">View Details</a>
-        </div>
-        <div class="book-card">
-            <h3>To Kill a Mockingbird</h3>
-            <p>by Harper Lee</p>
-            <a href="?isbn=B003">View Details</a>
-        </div>
-        <div class="book-card">
-            <h3>Pride and Prejudice</h3>
-            <p>by Jane Austen</p>
-            <a href="?isbn=B004">View Details</a>
-        </div>
-        <div class="book-card">
-            <h3>Salamisim</h3>
-            <p>by Binibining Mia</p>
-            <a href="?isbn=B005">View Details</a>
-        </div>
-    </div>
-<?php } ?>
+<?php
+if ($result->num_rows > 0) {
+    echo "<table>";
+    echo "<tr>
+            <th>ISBN</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Total Copies</th>
+            <th>Available Copies</th>
+            <th>Date Added</th>
+          </tr>";
 
-<!-- Show table (filtered or all) -->
-<table>
-    <tr>
-        <th>ISBN</th>
-        <th>TITLE</th>
-        <th>AUTHOR</th>
-        <th>TOTAL COPIES</th>
-        <th>AVAILABLE COPIES</th>
-        <th>DATE ADDED</th>
-    </tr>
-    <?php while ($row = $result->fetch_assoc()) { ?>
-        <tr>
-            <td><?= $row['isbn_num'] ?></td>
-            <td><?= $row['title_book'] ?></td>
-            <td><?= $row['author_book'] ?></td>
-            <td><?= $row['book_copy'] ?></td>
-            <td><?= $row['available_copies'] ?></td>
-            <td><?= $row['date_added'] ?></td>
-        </tr>
-    <?php } ?>
-</table>
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . $row['isbn_num'] . "</td>";
+        echo "<td>" . $row['title_book'] . "</td>";
+        echo "<td>" . $row['author_book'] . "</td>";
+        echo "<td>" . $row['book_copy'] . "</td>";
+        echo "<td>" . $row['avail_book'] . "</td>";
+        echo "<td>" . $row['date_added'] . "</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+} else {
+    echo "<p style='text-align:center;'>Book not found.</p>";
+}
+$conn->close();
+?>
 
-<?php if (isset($_GET['isbn'])) { ?>
-    <a href="catalog.php" class="back-btn">Back to Catalog</a>
-<?php } ?>
+<a href="browse.php" class="back-btn">Back to Browse</a>
 
 </body>
 </html>
-```
