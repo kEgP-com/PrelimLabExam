@@ -85,7 +85,7 @@ if ($result->num_rows > 0) {
         echo "<div class='book-card'>
                 <div class='book-title'>" . $row["title_book"] . "</div>
                 <div class='book-author'>by " . $row["author_book"] . "</div>
-                <a href='catalog.php?title=" . urlencode($row["title_book"]) . "'>View Details</a>
+                <a href='librarian.php'>View Details</a>
 
               </div>";
     }
