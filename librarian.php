@@ -26,7 +26,7 @@
         }
         table th, table td {
             border: 5px solid #76ccf3ff;
-            padding: 20PX;
+            padding: 20px;
             text-align: center;
         }
         .box-link {
@@ -48,6 +48,10 @@
         .links {
             text-align: center;
             margin-top: 20px;
+        }
+        .status-borrowed {
+            color: black;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -72,6 +76,7 @@
         echo "<th> TOTAL COPIES </th>";
         echo "<th> AVAILABLE COPIES </th>";
         echo "<th> DATE ADDED </th>";
+        echo "<th> STATUS </th>";
         echo "</tr>";
         
         while($result= $data->fetch_assoc()) {
@@ -82,13 +87,20 @@
             echo "<td>" . $result['book_copy'] . "</td>";
             echo "<td>" . $result['avail_book'] . "</td>";
             echo "<td>" . $result['date_added'] . "</td>";
+
+            
+            if ($result['avail_book'] < $result['book_copy']) {
+                echo "<td class='status-borrowed'>Borrowed</td>";
+            } else {
+                echo "<td></td>"; 
+            }
+
             echo "</tr>";
         }
         echo "</table>";
         ?>
     </div>
 
-    
     <div class="links">
         <a href="login.php" class="box-link">LOG OUT</a>
         <a href="user.php" class="box-link">EDIT</a>
