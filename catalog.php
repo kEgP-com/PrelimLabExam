@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -60,13 +59,13 @@ $result = $conn->query($sql);
     <?php if ($message) echo "<p class='message'>$message</p>"; ?>
 
     <div class="controls">
-
         <form id="borrowerForm">
             <input type="text" id="borrowerName" name="borrower_name" placeholder="Your Name" required>
             <input type="date" id="returnDate" name="return_date" required>
         </form>
 
-        <!-- Merge into develop branch from student 4: Search book feauture by Yasmien Regidor -->
+        <!-- Merge into develop branch from student 3: Search book feauture by Yasmien Regidor -->
+
         <form method="get" action="">
             <input type="text" name="search" placeholder="Search books..."
                 value="<?php echo htmlspecialchars($searchQuery); ?>">
@@ -77,7 +76,7 @@ $result = $conn->query($sql);
         </form>
     </div>
 
-    <!-- Book Table -->
+
     <table>
         <tr>
             <th>ISBN</th>
