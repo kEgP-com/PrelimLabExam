@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Redirect based on role
             if ($user['role'] === 'librarian') {
-                header("Location: dashboard.php");
+                header("Location: catalog.php");
                 exit;
             } else {
                 header("Location: catalog.php");
