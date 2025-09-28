@@ -1,58 +1,82 @@
+
 <?php
-session_start();
-$conn = new mysqli("db", "root", "rootpassword", "library_db");
-if ($conn->connect_error) {
-    die("Can't connect: " . $conn->connect_error);
-}
 
-// Require login
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
-    exit;
-}
 
-// Show all books
-$all_books = $conn->query("SELECT * FROM books");
 
-// Show borrowed books
-$borrowed = $conn->query("SELECT b.id AS borrow_id, b.user_id, bk.title, bk.author, b.borrow_date, b.return_date, b.status 
-                          FROM borrowed_books b 
-                          JOIN books bk ON b.book_id = bk.id 
-                          ORDER BY b.borrow_date DESC");
+$browseHistory = $conn->query("SELECT h.id, h.username, h.browse_date, 
+                                      bk.title_book, bk.author_book 
+                               FROM browse_history h
+                               JOIN books bk ON h.book_isbn = bk.isbn_num
+                               ORDER BY h.browse_date DESC");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Librarian Dashboard</title>
-</head>
-<body>
-    <h2>Welcome, <?= $_SESSION['username']; ?> (Librarian)</h2>
-    <a href="logout.php">Logout</a>
 
-    <h3>📚 All Books</h3>
-    <table border="1" cellpadding="5">
-        <tr><th>Title</th><th>Author</th><th>Status</th></tr>
-        <?php while ($row = $all_books->fetch_assoc()): ?>
-            <tr>
-                <td><?= $row['title']; ?></td>
-                <td><?= $row['author']; ?></td>
-                <td><?= $row['available'] ? "✅ Available" : "❌ Borrowed"; ?></td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+<div class="borrow-history">
+            <h3>Borrowed & Returned History</h3>
+            <?php if ($messageBorrow) { ?>
+            <p class="message success"><?php echo $messageBorrow; ?></p>
+            <?php } ?>
+            <div class="borrow-history-table">
+                <table>
+                    <tr>
+                        <th>User</th>
+                        <th>Book</th>
+                        <th>Borrowed</th>
+                        <th>Returned</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    <?php if ($borrowed && $borrowed->num_rows > 0) { 
+                        while ($row = $borrowed->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?php echo $row['borrower_name']; ?></td>
+                        <td><?php echo $row['title_book'] . " by " . $row['author_book']; ?></td>
+                        <td><?php echo $row['borrow_date']; ?></td>
+                        <td><?php echo $row['return_date'] ?: "Not yet"; ?></td>
+                        <td><?php echo ucfirst($row['status']); ?></td>
+                        <td>
+                            <?php if ($row['status'] === 'pending') { ?>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="borrow_id" value="<?php echo $row['borrow_id']; ?>">
+                                <button type="submit" name="return_book">Mark as Returned</button>
+                            </form>
+                            <?php } else { ?>
+                            <p>Done</p>
+                            <?php } ?>
+                        </td>
+                    </tr>
+                    <?php } } else { ?>
+                    <tr>
+                        <td colspan="6">No borrowed records yet.</td>
+                    </tr>
+                    <?php } ?>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <h3>📖 Borrowed Books Log</h3>
-    <table border="1" cellpadding="5">
-        <tr><th>User</th><th>Book</th><th>Borrowed</th><th>Returned</th><th>Status</th></tr>
-        <?php while ($row = $borrowed->fetch_assoc()): ?>
+
+<div class="browse-history">
+    <h3>Browse History</h3>
+    <div class="browse-history-table">
+        <table>
             <tr>
-                <td><?= $row['user_id']; ?></td>
-                <td><?= $row['title']; ?> by <?= $row['author']; ?></td>
-                <td><?= $row['borrow_date']; ?></td>
-                <td><?= $row['return_date'] ?: "Not yet"; ?></td>
-                <td><?= ucfirst($row['status']); ?></td>
+                <th>User</th>
+                <th>Book</th>
+                <th>Date Browsed</th>
             </tr>
-        <?php endwhile; ?>
-    </table>
-</body>
-</html>
+            <?php if ($browseHistory && $browseHistory->num_rows > 0) { 
+                while ($row = $browseHistory->fetch_assoc()) { ?>
+            <tr>
+                <td><?php echo $row['username']; ?></td>
+                <td><?php echo $row['title_book'] . " by " . $row['author_book']; ?></td>
+                <td><?php echo $row['browse_date']; ?></td>
+            </tr>
+            <?php } } else { ?>
+            <tr>
+                <td colspan="3">No browsing history yet.</td>
+            </tr>
+            <?php } ?>
+        </table>
+    </div>
+</div>
+
