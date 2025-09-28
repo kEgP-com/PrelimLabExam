@@ -1,72 +1,78 @@
 <?php
 session_start();
+include 'config.php';
 
-$conn = new mysqli("db", "root", "rootpassword", "library_db");
-if ($conn->connect_error) {
-    die("Can't connect: " . $conn->connect_error);
-}
+// Handle login form submit
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
-if (isset($_POST['login'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
+    // Get user from DB
+    $stmt = $conn->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows == 1) {
+    if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-   
-        if (md5($password) === $user['password']) {
+        // Verify password
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
-            if ($user['username'] === 'admin') {
-                header("Location: librarian.php");
+            // Redirect based on role
+            if ($user['role'] === 'librarian') {
+                header("Location: dashboard.php");
+                exit;
             } else {
                 header("Location: user.php");
+                exit;
             }
-            exit;
         } else {
-            $error = "Wrong password!";
+            $error = "❌ Invalid password!";
         }
     } else {
-        $error = "User not found!";
+        $error = "⚠️ User not found!";
     }
-
-    $stmt->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 50px; }
+        .form-container { background: #fff; padding: 20px; border-radius: 8px; width: 320px; margin: auto; text-align: center; }
+        input { width: 100%; padding: 8px; margin: 8px 0; }
+        button { width: 100%; padding: 10px; background: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .register-btn { background: #28a745; margin-top: 10px; }
+        .register-btn:hover { background: #218838; }
+        .error { color: red; margin-bottom: 10px; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h2>Logisn</h2>
+    <div class="form-container">
+        <h2>Login</h2>
+        <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
+        
+        <form method="POST" action="">
+            <label>Username:</label>
+            <input type="text" name="username" required>
 
-    <?php
-    if (isset($error)) {
-        echo "<p style='color:red;'>$error</p>";
-    }
-    ?>
+            <label>Password:</label>
+            <input type="password" name="password" required>
 
-    <form method="post" action="">
-        Username: <input type="text" name="username" required><br><br>
-        Password: <input type="password" id="password" name="password" required>
-        <input type="checkbox" onclick="showPassword()"> Show Password<br><br>
-        <input type="submit" name="login" value="Login">
-    </form>
+            <button type="submit">Login</button>
+        </form>
 
-    <script>
-    function showPassword() {
-        var x = document.getElementById("password");
-        x.type = x.type === "password" ? "text" : "password";
-    }
-    </script>
+        <!-- Register Button -->
+        <form action="register.php" method="get">
+            <button type="submit" class="register-btn">📝 Register</button>
+        </form>
+    </div>
 </body>
 </html>
