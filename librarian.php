@@ -37,7 +37,6 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System - Librarian</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
