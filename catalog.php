@@ -54,20 +54,19 @@ $result = $conn->query($sql);
 </head>
 
 <body>
-
+    <!-- Merge into develop branch from student 3: Borrow and view catalog book feauture by Rachel Ramos -->
     <h2>Library Catalog</h2>
 
     <?php if ($message) echo "<p class='message'>$message</p>"; ?>
 
-    <!-- Controls: Borrower Info + Search -->
     <div class="controls">
-        <!-- Borrower Info (outside table) -->
+
         <form id="borrowerForm">
             <input type="text" id="borrowerName" name="borrower_name" placeholder="Your Name" required>
             <input type="date" id="returnDate" name="return_date" required>
         </form>
 
-        <!-- Search -->
+        <!-- Merge into develop branch from student 4: Search book feauture by Yasmien Regidor -->
         <form method="get" action="">
             <input type="text" name="search" placeholder="Search books..."
                 value="<?php echo htmlspecialchars($searchQuery); ?>">

@@ -24,7 +24,6 @@ $messageBorrow = "";
 $editBook = null;
 
 
-// Helper: Generate ISBN like B001, B002, ...
 function generateISBN($conn) {
     $result = $conn->query("SELECT isbn_num FROM books ORDER BY CAST(SUBSTRING(isbn_num, 2) AS UNSIGNED) DESC LIMIT 1");
 
@@ -58,7 +57,7 @@ if (isset($_POST['add_book'])) {
     } else {
         $_SESSION['flash'] = "Error: " . $conn->error;
     }
-    header("Location: librarian.php"); // ✅ redirect to clear POST
+    header("Location: librarian.php"); 
     exit;
 }
 
@@ -92,7 +91,7 @@ if (isset($_POST['update_book'])) {
     } else {
         $_SESSION['flash'] = "Error: " . $conn->error;
     }
-    header("Location: librarian.php"); // ✅ redirect to clear POST
+    header("Location: librarian.php"); 
     exit;
 }
 
@@ -105,8 +104,7 @@ if (isset($_GET['delete'])) {
     } else {
         $_SESSION['flash'] = "Error: " . $conn->error;
     }
-    header("Location: librarian.php"); // ✅ redirect to clear GET
-    exit;
+    header("Location: librarian.php"); 
 }
 
 
@@ -141,7 +139,7 @@ if (isset($_POST['return_book'])) {
                   WHERE isbn_num = (SELECT book_isbn FROM borrowed_books WHERE id=$borrow_id)");
 
     $_SESSION['flash'] = "Book marked as returned.";
-    header("Location: librarian.php"); // ✅ redirect
+    header("Location: librarian.php"); 
     exit;
 }
 
@@ -152,7 +150,7 @@ $borrowed = $conn->query("SELECT b.id AS borrow_id, b.borrower_name, bk.title_bo
                           JOIN books bk ON b.book_isbn = bk.isbn_num
                           ORDER BY b.borrow_date DESC");
 
-// Retrieve flash message if exists
+
 if (isset($_SESSION['flash'])) {
     $messageBook = $_SESSION['flash'];
     unset($_SESSION['flash']);
@@ -175,9 +173,9 @@ if (isset($_SESSION['flash'])) {
             <button type="submit" name="logout" class="logout-btn">Logout</button>
         </form>
     </div>
-
+    <!-- Merge into develop branch from student 1: Create book feauture by Kin Prudente -->
     <div class="dashboard">
-        <!-- Add / Edit Book Form -->
+
         <div class="box">
             <h3><?php echo $editBook ? "Edit Book" : "Add New Book"; ?></h3>
             <?php if ($messageBook) { ?>
@@ -188,7 +186,7 @@ if (isset($_SESSION['flash'])) {
 
             <form method="post" action="">
                 <?php if ($editBook) { ?>
-                <!-- ISBN is fixed, read-only when editing -->
+
                 <input type="hidden" name="old_isbn" value="<?php echo $editBook['isbn_num']; ?>">
                 ISBN: <input type="text" value="<?php echo $editBook['isbn_num']; ?>" readonly><br>
                 <?php } ?>
@@ -213,8 +211,9 @@ if (isset($_SESSION['flash'])) {
             </form>
         </div>
 
-        <!-- Borrowed / Returned History -->
-        <div class="borrow-history">
+
+        <!-- Merge into develop branch from student 5: feature/borrow and return book feauture by Marc Reantaso-->
+        < <div class="borrow-history">
             <h3>Borrowed & Returned History</h3>
             <?php if ($messageBorrow) { ?>
             <p class="message success"><?php echo $messageBorrow; ?></p>
@@ -255,7 +254,7 @@ if (isset($_SESSION['flash'])) {
                     <?php } ?>
                 </table>
             </div>
-        </div>
+    </div>
     </div>
 
     <!-- Merge into develop branch from student 3: Borrow and view catalog book feauture by Rachel Ramos -->
