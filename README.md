@@ -3,7 +3,8 @@ Group Members:
 Kin Edrian Prudente,
 Rachel Ramos,
 Niel Reyes,
-Marc Reantaso 
+Marc Reantaso,
+Yasmien Regidor
 
 Machine Problem: Simple Library Management System (Web-based) 
 
