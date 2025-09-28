@@ -1,91 +1,82 @@
+
 <?php
-// Librarian book management (Search Feature Only)
-session_start();
 
-if (isset($_POST['logout'])) {
-    session_unset();
-    session_destroy();
-    header("Location: login.php");
-    exit;
-}
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'librarian') {
-    header("Location: login.php");
-    exit;
-}
 
-$conn = new mysqli("db", "root", "rootpassword", "library_db");
-if ($conn->connect_error) {
-    die("Can't connect: " . $conn->connect_error);
-}
-
-  // Student 4 Feature: Search Books
-
-$searchQuery = "";
-if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
-    $searchQuery = $conn->real_escape_string(trim($_GET['search']));
-    $result = $conn->query("SELECT * FROM books 
-                            WHERE title LIKE '%$searchQuery%' 
-                               OR author LIKE '%$searchQuery%' 
-                               OR isbn LIKE '%$searchQuery%'
-                            ORDER BY date_added DESC");
-} else {
-    $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
-}
+$browseHistory = $conn->query("SELECT h.id, h.username, h.browse_date, 
+                                      bk.title_book, bk.author_book 
+                               FROM browse_history h
+                               JOIN books bk ON h.book_isbn = bk.isbn_num
+                               ORDER BY h.browse_date DESC");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Librarian Dashboard - Search</title>
-    <link rel="stylesheet" href="style_library.css">
-</head>
-<body>
-    <div class="header">
-        <h2>Librarian Dashboard (Search Only)</h2>
-        <form method="post" style="margin:0;">
-            <button type="submit" name="logout" class="logout-btn">Logout</button>
-        </form>
-    </div>
-
-    <div class="book-list">
-        <h3>Book List</h3>
-
-        <!-- Student 4 Feature: Search Form -->
-        <form method="get" action="librarian.php" class="search-form">
-            <input type="text" name="search" placeholder="Search by Title, Author, or ISBN"
-                   value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
-            <button type="submit">Search</button>
-            <a href="librarian.php"><button type="button">Clear</button></a>
-        </form>
-
-        <div class="table-container">
-            <table>
-                <tr>
-                    <th>ISBN</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Copies</th>
-                    <th>Available</th>
-                    <th>Date Added</th>
-                </tr>
-                <?php if ($result && $result->num_rows > 0) { 
-                    while ($row = $result->fetch_assoc()) { ?>
-                <tr>
-                    <td><?php echo $row['isbn']; ?></td>
-                    <td><?php echo $row['title']; ?></td>
-                    <td><?php echo $row['author']; ?></td>
-                    <td><?php echo $row['copies']; ?></td>
-                    <td><?php echo $row['available']; ?></td>
-                    <td><?php echo $row['date_added']; ?></td>
-                </tr>
-                <?php } } else { ?>
-                <tr>
-                    <td colspan="6">No books found.</td>
-                </tr>
-                <?php } ?>
-            </table>
+<div class="borrow-history">
+            <h3>Borrowed & Returned History</h3>
+            <?php if ($messageBorrow) { ?>
+            <p class="message success"><?php echo $messageBorrow; ?></p>
+            <?php } ?>
+            <div class="borrow-history-table">
+                <table>
+                    <tr>
+                        <th>User</th>
+                        <th>Book</th>
+                        <th>Borrowed</th>
+                        <th>Returned</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    <?php if ($borrowed && $borrowed->num_rows > 0) { 
+                        while ($row = $borrowed->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?php echo $row['borrower_name']; ?></td>
+                        <td><?php echo $row['title_book'] . " by " . $row['author_book']; ?></td>
+                        <td><?php echo $row['borrow_date']; ?></td>
+                        <td><?php echo $row['return_date'] ?: "Not yet"; ?></td>
+                        <td><?php echo ucfirst($row['status']); ?></td>
+                        <td>
+                            <?php if ($row['status'] === 'pending') { ?>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="borrow_id" value="<?php echo $row['borrow_id']; ?>">
+                                <button type="submit" name="return_book">Mark as Returned</button>
+                            </form>
+                            <?php } else { ?>
+                            <p>Done</p>
+                            <?php } ?>
+                        </td>
+                    </tr>
+                    <?php } } else { ?>
+                    <tr>
+                        <td colspan="6">No borrowed records yet.</td>
+                    </tr>
+                    <?php } ?>
+                </table>
+            </div>
         </div>
     </div>
-</body>
-</html>
+
+
+<div class="browse-history">
+    <h3>Browse History</h3>
+    <div class="browse-history-table">
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Book</th>
+                <th>Date Browsed</th>
+            </tr>
+            <?php if ($browseHistory && $browseHistory->num_rows > 0) { 
+                while ($row = $browseHistory->fetch_assoc()) { ?>
+            <tr>
+                <td><?php echo $row['username']; ?></td>
+                <td><?php echo $row['title_book'] . " by " . $row['author_book']; ?></td>
+                <td><?php echo $row['browse_date']; ?></td>
+            </tr>
+            <?php } } else { ?>
+            <tr>
+                <td colspan="3">No browsing history yet.</td>
+            </tr>
+            <?php } ?>
+        </table>
+    </div>
+</div>
+

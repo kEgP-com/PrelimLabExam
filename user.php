@@ -1,92 +1,50 @@
 <?php
-// Librarian book management (Search Feature Only for USER)
-session_start();
-
-if (isset($_POST['logout'])) {
-    session_unset();
-    session_destroy();
-    header("Location: login.php");
-    exit;
-}
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'librarian') {
-    header("Location: login.php");
-    exit;
-}
-
 $conn = new mysqli("db", "root", "rootpassword", "library_db");
+
 if ($conn->connect_error) {
-    die("Can't connect: " . $conn->connect_error);
+    die("<h2>Connection Failed</h2>");
 }
 
-
-   // Student 4 Feature: Search Books
-
-$searchQuery = "";
-if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
-    $searchQuery = $conn->real_escape_string(trim($_GET['search']));
-    $result = $conn->query("SELECT * FROM books 
-                            WHERE title LIKE '%$searchQuery%' 
-                               OR author LIKE '%$searchQuery%' 
-                               OR isbn LIKE '%$searchQuery%'
-                            ORDER BY date_added DESC");
-} else {
-    $result = $conn->query("SELECT * FROM books ORDER BY date_added DESC");
-}
+$sql = "SELECT isbn_num, title_book, author_book, book_copy, avail_book, date_added 
+        FROM books ORDER BY date_added DESC";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Librarian Dashboard - Search</title>
-    <link rel="stylesheet" href="style_library.css">
+    <title>Books List</title>
+    <link rel="stylesheet" href="user.css">
+
 </head>
+
 <body>
+    <!-- Merge into develop branch from student 3: Borrow and view catalog book feauture by Rachel Ramos -->
     <div class="header">
-        <h2>Librarian Dashboard (Search Only)</h2>
-        <form method="post" style="margin:0;">
-            <button type="submit" name="logout" class="logout-btn">Logout</button>
-        </form>
-    </div>
-
-    <div class="book-list">
-        <h3>Book List</h3>
-
-        <!-- Student 4 Feature: Search Form -->
-        <form method="get" action="librarian.php" class="search-form">
-            <input type="text" name="search" placeholder="Search by Title, Author, or ISBN"
-                   value="<?php echo isset($searchQuery) ? $searchQuery : ''; ?>">
-            <button type="submit">Search</button>
-            <a href="librarian.php"><button type="button">Clear</button></a>
-        </form>
-
-        <div class="table-container">
-            <table>
-                <tr>
-                    <th>ISBN</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Copies</th>
-                    <th>Available</th>
-                    <th>Date Added</th>
-                </tr>
-                <?php if ($result && $result->num_rows > 0) { 
-                    while ($row = $result->fetch_assoc()) { ?>
-                <tr>
-                    <td><?php echo $row['isbn']; ?></td>
-                    <td><?php echo $row['title']; ?></td>
-                    <td><?php echo $row['author']; ?></td>
-                    <td><?php echo $row['copies']; ?></td>
-                    <td><?php echo $row['available']; ?></td>
-                    <td><?php echo $row['date_added']; ?></td>
-                </tr>
-                <?php } } else { ?>
-                <tr>
-                    <td colspan="6">No books found.</td>
-                </tr>
-                <?php } ?>
-            </table>
+        <h1>Welcome to Library Management System</h1>
+        <div class="top-buttons">
+            <a href="catalog.php" class="btn">View Catalog</a>
+            <a href="login.php" class="btn">Log Out</a>
         </div>
     </div>
+
+    <div class="book-container">
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<div class='book-card'>
+                        <div class='book-title'>" . $row["title_book"] . "</div>
+                        <div class='book-author'>by " . $row["author_book"] . "</div>
+                      </div>";
+            }
+        } else {
+            echo "<p style='text-align:center;'>No books found.</p>";
+        }
+        $conn->close();
+        ?>
+    </div>
+
 </body>
+
 </html>
