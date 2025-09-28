@@ -11,7 +11,7 @@ if (isset($_GET['logout'])) {
     header("Location: login.php");
     exit;
 }
-
+// s  dsdsdsds
 
 if (isset($_GET['delete'])) {
     $isbn = $_GET['delete'];
@@ -44,7 +44,7 @@ $result = $conn->query("SELECT * FROM books");
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Librarian - Manage Books</title>
+    <title>Librarian  Manage Books</title>
     <style>
         .container {
             width: 90%;
