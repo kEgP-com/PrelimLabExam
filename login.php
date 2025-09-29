@@ -76,12 +76,12 @@ if (isset($_POST['login'])) {
 
     input[type="text"]:focus,
     input[type="password"]:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 5px #3498db;
+        border-color: #34dbac;
+        box-shadow: 0 0 5px #34dbac;
     }
 
     input[type="submit"] {
-        background: #3498db;
+        background: #34dbac;
         color: white;
         border: none;
         padding: 12px;
@@ -93,7 +93,7 @@ if (isset($_POST['login'])) {
     }
 
     input[type="submit"]:hover {
-        background: #3498db;
+        background: #058120ff;
     }
 
     .error {

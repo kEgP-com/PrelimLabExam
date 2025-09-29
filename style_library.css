@@ -107,7 +107,7 @@
     }
 
     .book-list th {
-        background-color: #3498db;
+        background-color:#34dbac;
         color: white;
         text-align: center;
     }
@@ -237,7 +237,7 @@
 }
 
 .borrow-history th {
-    background-color: #3498db;
+    background-color: #34dbac;
     color: white;
 }
 
