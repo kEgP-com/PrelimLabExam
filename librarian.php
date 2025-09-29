@@ -222,8 +222,8 @@ if (isset($_SESSION['flash'])) {
                     <tr>
                         <th>User</th>
                         <th>Book</th>
-                        <th>Borrowed</th>
                         <th>Returned</th>
+                        <th>Borrowed</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
